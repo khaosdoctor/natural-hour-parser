@@ -10,8 +10,8 @@
 	"scripts": {
 		"build": "tsc",
 		"prestart": "npm run build",
-		"start": "node dist/index.js",
-		"start:dev": "tsx watch src/index.ts",
+		"start": "node --env-file=.env dist/index.js",
+		"start:dev": "DEBUG=wolt* tsx watch src/index.ts",
 		"test": "glob -c \"node --experimental-test-coverage --import tsx --test\" \"./src/**/*.test.ts\"",
 		"prepare": "husky install"
 	},
