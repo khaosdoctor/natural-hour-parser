@@ -18,7 +18,7 @@ interface Interval {
 }
 
 type IntervalObject = {
-	[k in WeekDays]: Interval[]
+	[k in WeekDays]: Array<Required<Interval>>
 }
 
 type StateKeeper = { [k in WeekDays]: Interval }
@@ -26,8 +26,8 @@ type StateKeeper = { [k in WeekDays]: Interval }
 export class HourParser {
 	readonly #logger: Debugger
 	constructor(config: AppConfig) {
-		this.#logger = config.logger.extend('ParserService')
-		this.#logger('ParserService initialized')
+		this.#logger = config.logger.extend(HourParser.name)
+		this.#logger(`${HourParser.name} initialized`)
 	}
 
 	async parseOpeningHours(input: OpeningHoursInput) {
@@ -87,9 +87,12 @@ export class HourParser {
 
 				if (!this.#checkForMatchingState(yesterday, state[yesterday])) {
 					logger('No matching state for %s', yesterday)
-					state[yesterday].close = new Date(value)
-					if (this.#checkForMatchingState(yesterday, state[yesterday])) {
-						finalInterval[yesterday].push(structuredClone(state[yesterday]))
+					state[yesterday] = state[yesterday] ?? {}
+					state[yesterday].close = new Date(new Date(value).toUTCString())
+					const stateToPush = structuredClone(state[yesterday])
+
+					if (this.#checkForMatchingState(yesterday, stateToPush)) {
+						finalInterval[yesterday].push(stateToPush)
 						logger('Added %s to final interval', yesterday)
 						logger(
 							`set close time for ${yesterday}: %O`,
@@ -103,13 +106,14 @@ export class HourParser {
 
 			logger('Setting state for %s on %s', type, day)
 			logger('Current state: %O', state)
-			state[day][type] = new Date(value)
+			state[day][type] = new Date(new Date(value).toUTCString())
 			logger('State set for %s', day)
 			logger('Current state: %O', state)
 
-			if (this.#checkForMatchingState(day, state[day])) {
-				logger('Found final state for %s', day)
-				finalInterval[day].push(structuredClone(state[day]))
+			logger('Found final state for %s', day)
+			const stateToPush = structuredClone(state[day])
+			if (this.#checkForMatchingState(day, stateToPush)) {
+				finalInterval[day].push(stateToPush)
 				state[day] = {}
 			}
 		})
@@ -128,9 +132,18 @@ export class HourParser {
 		return todayIndex
 	}
 
-	#checkForMatchingState(day: string, state: Interval) {
+	#checkForMatchingState(
+		day: string,
+		state: Interval
+	): state is Required<Interval> {
 		this.#logger(`Checking state for ${day}: %O`)
-		return state.open && state.close
+		return (
+			state &&
+			'open' in state &&
+			'close' in state &&
+			state.open instanceof Date &&
+			state.close instanceof Date
+		)
 	}
 
 	#validateInput(input: OpeningHoursInput) {

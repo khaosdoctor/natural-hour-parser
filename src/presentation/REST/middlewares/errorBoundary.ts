@@ -17,6 +17,8 @@ export function errorBoundary(baseLogger: Debugger) {
 				return res.status(err.status).json(err.toObject())
 			}
 		}
-		next()
+		res.status(500).json({
+			message: 'Internal server error',
+		})
 	}
 }
