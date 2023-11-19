@@ -21,7 +21,7 @@ async function initializeDependencies(config: AppConfig) {
 }
 
 async function main(application: ApplicationInterface, config: AppConfig) {
-	const logger = config.logger.extend('perspective:main')
+	const logger = config.logger.extend('main')
 	logger('Starting application with config %O', config)
 
 	const services = await initializeDependencies(config)
