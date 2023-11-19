@@ -7,13 +7,20 @@ export class ParserService {
 	readonly #logger: Debugger
 	readonly #parser: HourParser
 	constructor(config: AppConfig) {
-		this.#logger = config.logger.extend('ParserService')
-		this.#logger('ParserService initialized')
+		this.#logger = config.logger.extend(ParserService.name)
+		this.#logger(`${ParserService.name} initialized`)
 		this.#parser = new HourParser(config)
 	}
 
 	async parseOpeningHours(input: OpeningHoursInput) {
 		this.#logger('Parsing opening hours')
 		return await this.#parser.parseOpeningHours(input)
+	}
+
+	formatIntervals(
+		intervals: Awaited<ReturnType<HourParser['parseOpeningHours']>>
+	) {
+		this.#logger('Formatting intervals')
+		return this.#parser.formatOutput(intervals)
 	}
 }

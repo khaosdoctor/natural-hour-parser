@@ -10,7 +10,7 @@ import {
 	type OpeningStateInterval,
 } from '../domain/validation.js'
 import { HTTPError } from '../presentation/REST/errors/HTTPError.js'
-import { indexToWeekday, weekdayToIndex } from './utils.js'
+import { capitalize, indexToWeekday, weekdayToIndex } from './utils.js'
 
 interface Interval {
 	open?: Date
@@ -145,5 +145,30 @@ export class HourParser {
 				code: 'INVALID_INPUT',
 			})
 		}
+	}
+
+	formatOutput(input: IntervalObject) {
+		const logger = this.#logger.extend('formatOutput')
+		const entries = Object.entries(input)
+		const formatter = Intl.DateTimeFormat('en-US', {
+			hour12: true,
+			timeStyle: 'short',
+			timeZone: 'UTC',
+		})
+
+		const formatted = entries.map(([day, intervals]) => {
+			logger('Formatting %s', day)
+			const formattedIntervals = intervals.length
+				? intervals.map(({ open, close }) => {
+						logger('Formatting %s - %s', open, close)
+						return `${formatter.format(open)} - ${formatter.format(close)}`
+				  })
+				: ['Closed']
+			logger('Formatted intervals: %O', formattedIntervals)
+			return `${capitalize(day)}: ${formattedIntervals.join(', ')}`
+		})
+
+		logger('Formatted output: %O', formatted)
+		return formatted.join('\n')
 	}
 }

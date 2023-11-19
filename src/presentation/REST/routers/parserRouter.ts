@@ -27,7 +27,7 @@ export function parserRouterFactory(config: AppConfig, services: ServiceList) {
 					'Content-Type': 'text/plain',
 				})
 
-				return res.send().end()
+				return res.send(services.parserService.formatIntervals(result)).end()
 			} catch (error) {
 				routeLogger('Error parsing opening hours: %O', error)
 				next(error)
