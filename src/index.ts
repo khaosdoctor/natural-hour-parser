@@ -30,7 +30,7 @@ async function main(application: ApplicationInterface, config: AppConfig) {
 	const gracefulTimeout = async () => {
 		await Promise.race([
 			stop(),
-			setTimeout(10000).then(() => {
+			setTimeout(5000).then(() => {
 				console.info('Graceful shutdown timed out, forcing exit')
 				process.exit(1)
 			}),
