@@ -6,22 +6,38 @@ import { OpeningHoursInputSchema } from '../../domain/validation.js'
 import { type ServiceList } from '../../index.js'
 import { errorBoundary } from './middlewares/errorBoundary.js'
 import { validateZodSchema } from './middlewares/zodValidation.js'
-import { parserRouterFactory } from './routers/parserRouter.js'
+import { getParserRoutes } from './routers/parserRouter.js'
+import { type Debugger } from 'debug'
 
-export async function RESTInterface(config: AppConfig, services: ServiceList) {
-	const logger = config.logger.extend('RESTInterface')
+function loadRoutes(
+	logger: Debugger,
+	config: AppConfig,
+	services: ServiceList
+) {
 	const app = Express()
 	app.use(helmet())
 	app.use(Express.json())
+	app.use(async (req, _, next) => {
+		const localLogger = logger.extend(`${req.method}:${req.path}`)
+		localLogger('<- %s %s', req.method, req.path)
+		localLogger('Body:\n\t\t%O', req.body)
+		next()
+	})
 	app.get('/ping', (_, res) => res.send('pong'))
 
 	app.use(
 		'/parsers',
 		validateZodSchema(OpeningHoursInputSchema),
-		parserRouterFactory(config, services)
+		getParserRoutes(config, services)
 	)
 
 	app.use(errorBoundary(logger))
+	return app
+}
+
+export async function RESTInterface(config: AppConfig, services: ServiceList) {
+	const logger = config.logger.extend('RESTInterface')
+	const app = loadRoutes(logger, config, services)
 
 	let server: Server | undefined
 	return {

@@ -3,15 +3,9 @@ import { type AppConfig } from '../../../config.js'
 import { type ServiceList } from '../../../index.js'
 import { type OpeningHoursInput } from '../../../domain/validation.js'
 
-export function parserRouterFactory(config: AppConfig, services: ServiceList) {
+export function getParserRoutes(config: AppConfig, services: ServiceList) {
 	const logger = config.logger.extend('parserRouter')
 	const router = Router()
-
-	router.use((req, _, next) => {
-		logger('<- %s %s', req.method, req.path)
-		logger('Body:\n\t\t%O', req.body)
-		next()
-	})
 
 	router.post(
 		'/restaurants/opening-hours',
