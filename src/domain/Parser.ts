@@ -9,7 +9,7 @@ import {
 	type OpeningHoursInput,
 	type OpeningStateInterval,
 } from '../domain/validation.js'
-import { HTTPError } from './errors/HTTPError.js'
+import { DomainError } from './errors/DomainError.js'
 import { capitalize, indexToWeekday, weekdayToIndex } from './utils.js'
 
 interface Interval {
@@ -60,8 +60,8 @@ export class HourParser {
 				state,
 				finalInterval
 			)
-			finalInterval = updatedState.finalInterval
-			state = updatedState.state
+			finalInterval = structuredClone(updatedState.finalInterval)
+			state = structuredClone(updatedState.state)
 		}
 
 		this.#logger('Final interval: %O', finalInterval)
@@ -126,6 +126,10 @@ export class HourParser {
 
 	#getCurrentDayIndex(day: WeekdayList) {
 		const todayIndex = weekdayToIndex.get(day)
+		// This should never happen
+		// it's just a sanity check so TS doesn't complain
+		// because map.get can return undefined by definition
+		/* istanbul ignore next */
 		if (todayIndex === undefined || todayIndex === null) {
 			throw new Error(`Invalid Day index`)
 		}
@@ -137,13 +141,7 @@ export class HourParser {
 		state: Interval
 	): state is Required<Interval> {
 		this.#logger(`Checking state for ${day}: %O`)
-		return (
-			state &&
-			'open' in state &&
-			'close' in state &&
-			state.open instanceof Date &&
-			state.close instanceof Date
-		)
+		return state && 'open' in state && 'close' in state
 	}
 
 	#validateInput(input: OpeningHoursInput) {
@@ -151,7 +149,7 @@ export class HourParser {
 		// otherwise we will end up with an open or closed state without a match
 		const totalCount = Object.values(input).flat().length
 		if (totalCount % 2 !== 0) {
-			throw new HTTPError({
+			throw new DomainError({
 				message: 'Number of opening and closing hours must match',
 				name: 'InvalidInputError',
 				status: 422,
