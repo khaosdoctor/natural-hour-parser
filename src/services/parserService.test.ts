@@ -107,7 +107,9 @@ describe('ParserService', () => {
 				},
 			} as unknown as AppConfig
 			const service = new ParserService(testConfig)
-			const result = await service.parseOpeningHours({})
+			const result = await service.parseOpeningHours(
+				{} as unknown as OpeningHoursInput
+			)
 
 			expect(parserSpy).toHaveBeenCalledTimes(1)
 			expect(result).toEqual({})
@@ -196,7 +198,9 @@ describe('ParserService', () => {
 				throw new Error('test')
 			})
 			const service = new ParserService(testConfig)
-			await expect(service.parseOpeningHours({})).rejects.toThrow('test')
+			await expect(
+				service.parseOpeningHours({} as unknown as OpeningHoursInput)
+			).rejects.toThrow('test')
 		})
 	})
 

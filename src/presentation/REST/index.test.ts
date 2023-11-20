@@ -112,13 +112,59 @@ describe('Integration Tests', () => {
 			expect(response.status).toBe(406)
 		})
 
-		it('should strip unknown keys and treat as valid input', async () => {
+		it('should strip unknown keys and treat as empty input', async () => {
 			const response = await wrappedApp
 				.post('/parsers/restaurants/opening-hours')
 				.send({ invalid: 'input' })
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'application/json')
 
 			expect(response.status).toBe(200)
-			expect(response.body).toMatchInlineSnapshot(`{}`)
+			expect(response.body).toMatchSnapshot()
+		})
+
+		it('should treat empty days as closed', async () => {
+			const response = await wrappedApp
+				.post('/parsers/restaurants/opening-hours')
+				.send({})
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'text/plain')
+
+			expect(response.status).toBe(200)
+			expect(response.text).toMatchSnapshot()
+		})
+
+		it('should strip unknown keys and keep known ones', async () => {
+			const response = await wrappedApp
+				.post('/parsers/restaurants/opening-hours')
+				.send({
+					monday: [
+						{
+							type: 'open',
+							value: 3600,
+						},
+						{
+							type: 'close',
+							value: 7200,
+						},
+					],
+				})
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'text/plain')
+
+			expect(response.status).toBe(200)
+			expect(response.text).toMatchSnapshot()
+		})
+
+		it('should treat empty days as closed', async () => {
+			const response = await wrappedApp
+				.post('/parsers/restaurants/opening-hours')
+				.send('{}')
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'text/plain')
+
+			expect(response.status).toBe(200)
+			expect(response.text).toMatchSnapshot()
 		})
 
 		it('should handle input errors', async () => {

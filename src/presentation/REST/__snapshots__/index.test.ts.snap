@@ -82,3 +82,45 @@ Thursday: 10:30 AM - 6:00 PM
 Friday: 10:00 AM - 1:00 AM
 Saturday: 10:00 AM - 1:00 AM"
 `;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should strip unknown keys and keep known ones 1`] = `
+"Sunday: Closed
+Monday: 1:00 AM - 2:00 AM
+Tuesday: Closed
+Wednesday: Closed
+Thursday: Closed
+Friday: Closed
+Saturday: Closed"
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should strip unknown keys and treat as empty input 1`] = `
+{
+  "friday": [],
+  "monday": [],
+  "saturday": [],
+  "sunday": [],
+  "thursday": [],
+  "tuesday": [],
+  "wednesday": [],
+}
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should treat empty days as closed 1`] = `
+"Sunday: Closed
+Monday: Closed
+Tuesday: Closed
+Wednesday: Closed
+Thursday: Closed
+Friday: Closed
+Saturday: Closed"
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should treat empty days as closed 2`] = `
+"Sunday: Closed
+Monday: Closed
+Tuesday: Closed
+Wednesday: Closed
+Thursday: Closed
+Friday: Closed
+Saturday: Closed"
+`;
