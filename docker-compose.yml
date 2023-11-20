@@ -1,0 +1,9 @@
+services:
+  wolt:
+    build: .
+    container_name: wolt-opening-times
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DEBUG=wolt*
