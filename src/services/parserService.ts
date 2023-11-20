@@ -21,6 +21,6 @@ export class ParserService {
 		intervals: Awaited<ReturnType<HourParser['parseOpeningHours']>>
 	) {
 		this.#logger('Formatting intervals')
-		return this.#parser.formatOutput(intervals)
+		return this.#parser.toText(intervals)
 	}
 }

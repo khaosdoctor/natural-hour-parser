@@ -26,7 +26,9 @@ const objectSchema: {
 }, {})
 
 export const OpeningHoursInputSchema = z.object(objectSchema).partial()
-// Zod Inference did not work here,
+
+// Zod Inference did not work here
+// most likely because of the dynamic object
 export type OpeningHoursInput = {
 	[k in WeekDays]?: OpeningStateInterval[]
 }

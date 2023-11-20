@@ -1,6 +1,6 @@
 import { type Debugger } from 'debug'
 import { type NextFunction, type Request, type Response } from 'express'
-import { HTTPError } from '../errors/HTTPError.js'
+import { HTTPError } from '../../../domain/errors/HTTPError.js'
 
 export function errorBoundary(baseLogger: Debugger) {
 	const logger = baseLogger.extend('errorBoundary')

@@ -9,7 +9,7 @@ import {
 	type OpeningHoursInput,
 	type OpeningStateInterval,
 } from '../domain/validation.js'
-import { HTTPError } from '../presentation/REST/errors/HTTPError.js'
+import { HTTPError } from './errors/HTTPError.js'
 import { capitalize, indexToWeekday, weekdayToIndex } from './utils.js'
 
 interface Interval {
@@ -160,7 +160,7 @@ export class HourParser {
 		}
 	}
 
-	formatOutput(input: IntervalObject) {
+	toText(input: IntervalObject) {
 		const logger = this.#logger.extend('formatOutput')
 		const entries = Object.entries(input)
 		const formatter = Intl.DateTimeFormat('en-US', {

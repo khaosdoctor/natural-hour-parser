@@ -12,7 +12,7 @@ export type ApplicationInterface = (
 /**
  * It's also possible to use a dependency injection framework like InversifyJS
  * or TSyringe here to manage dependencies and create DI containers
- * but this would be overkill for this example
+ * but this would be overkill for this api
  */
 async function initializeDependencies(config: AppConfig) {
 	return {
@@ -20,6 +20,10 @@ async function initializeDependencies(config: AppConfig) {
 	}
 }
 
+/**
+ * Entrypoint, this is where the application starts
+ * if we had more presentation interfaces, this is where we would initialize them
+ */
 async function main(application: ApplicationInterface, config: AppConfig) {
 	const logger = config.logger.extend('main')
 	logger('Starting application with config %O', config)
