@@ -199,7 +199,21 @@ The application only has one endpoint `POST /parsers/restaurants/opening-hours` 
 }
 ```
 
-No input is also a valid input, in this case, the output will be empty. Non-existing days of the week or unknown keys will be stripped and ignored. So:
+No input is also a valid input, however as choice made, **days that are not sent will be considered as closed**, so an input like `{}` will be parsed as:
+
+```json
+{
+	"monday": [],
+	"tuesday": [],
+	"wednesday": [],
+	"thursday": [],
+	"friday": [],
+	"saturday": [],
+	"sunday": []
+}
+```
+
+Unknown keys will be stripped and ignored. So:
 
 ```json
 {
@@ -219,7 +233,7 @@ Will be parsed as:
 
 ### Changing the output format
 
-You can use the `Accept` header to change the output format, the application supports `application/json` and `text/plain` formats. If you don't specify the `Accept` header, the application will default to `application/json`.
+You can use the `Accept` header to change the output format, the application supports `application/json` and `text/plain` formats. If you don't specify the `Accept` header, the application will default to `application/json`. If there's any other value than `application/json` or `text/plain` the application will return a `406 Not Acceptable` error.
 
 Example response with JSON:
 
@@ -285,6 +299,8 @@ I'm using a mix of an layered architecture with a simpler concept. The applicati
 - The **presentation layer** is responsible for handling the HTTP requests and responses, as well as the validation of the input and the output. Each presentation interface can be found in the `src/presentation` folder.
   - I chose to do it like this so we could easily add more interfaces in the future, for example, we could add a CLI interface or a GraphQL interface.
   - All HTTP validation (and object validation) is done using [zod](https://zod.dev)
+  - The REST interface is using [express](https://expressjs.com) as the HTTP server, I don't think it's the best out there, but it's the most popular and it's very simple to use.
+  - There's an integration test for this interface in the [index.test.ts](./src/presentation/REST/index.test.ts) file.
 - The **service layer** in most cases is the layer that connects the presentation with the data layer, since we don't have a data layer in this application, it's just a layer that connects the presentation with the business logic.
   - I chose to do it like this so we could easily add a data layer in the future, for example, we could add a database to store the restaurants and their opening hours.
   - The service layer is also responsible for calling the Parser, which is the business logic of the application.
@@ -296,7 +312,7 @@ Also, parser code is agnostic to the input and output format, so we could easily
 The _domain_ layer is also responsible for holding the types, validations, errors, constants, and any other utility functions that are used in the application since it can be used by both the presentation and the service layers.
 
 - **Types**: All the types are defined in the `src/domain/types.ts` file, this file is used by both the presentation and the service layers.
-- **Errors**: All the errors are defined in the `src/domain/errors` directory, it was possible to create more errors but since we only have one parser, I decided to keep it simple and only create one error with multiple options. You can find more comments on it on [the error file](./src/domain/errors/HTTPError.ts).
+- **Errors**: All the errors are defined in the `src/domain/errors` directory, it was possible to create more errors but since we only have one parser, I decided to keep it simple and only create one error with multiple options. You can find more comments on it on [the error file](./src/domain/errors/DomainError.ts).
 - **Constants**: All the constants are defined in the `src/domain/constants.ts` file, I usually keep the constants and the types in the same file, but in this case I decided to separate to make it easier to read.
 - **Utilities**: All the utility functions are defined in the `src/domain/utils.ts` file, these are general utilities like casing, index to day of the week, etc.
 
@@ -304,7 +320,7 @@ The _domain_ layer is also responsible for holding the types, validations, error
 
 I usually use [zod](https://zod.dev) for validation, it's a very simple and lightweight package that allows us to easily validate objects and types. I'm using it to validate the input and output of the application, as well as the configuration in general.
 
-Usually, when I'm using a layered architecture, I usually create an entity class that will have the validation logic, but in this application there are no entities, so the validation schemas are in the [`src/domain/validation.ts`](./src/domain/validation.ts) file.
+Usually, when I'm using a layered architecture, I create an entity class that will have the validation logic, but in this application there are no entities, so the validation schemas are in the [`src/domain/validation.ts`](./src/domain/validation.ts) file.
 
 For the presentation layer, I usually validate the schemas with a middleware, this app has a [zod middleware](./src/presentation/REST/middlewares/zodValidation.ts) that validates the input schema and returns 422 if it's invalid.
 
@@ -314,13 +330,16 @@ For all other errors, there's [another middleware](./src/presentation/REST/middl
 
 - I'm using Node 20.6+ with ES6 modules so we have the latest features of the language.
 - I could use Node's native test runner but it's still experimental and it doesn't have a good support for general mocks, so I'm using [Jest](https://jestjs.io) instead.
+  - I personally don't like jest a lot, but the way it mocks the modules is very simple and it's very easy to use. I could also use [sinon](https://sinonjs.org) but Jest already comes with the runner bundled.
+  - Jest has a problem with the newest configurations for ESM that requires a lot of boilerplate code and some trial and error to use. I set it up with TS-Jest but unfortunately some features like top-level await are not supported yet, and some other features are in a limbo stage where you have to use a lot of workarounds to make it work.
+  - In my opinion, the Node.js test runner in the future will be the best option, but it has a very weird API for assertions as well as mocking, so, despite being a contributor to that, I'm not actively using it yet.
 - I'm using [debug](https://www.npmjs.com/package/debug) for logging, it's a very simple and lightweight package that allows us to easily filter the logs by prefix.
 - There are some comments in the code, I usually don't like to add comments unless it's to make it easier to understand, but I added some to explain some decisions I made.
 
 ### Potential edge cases
 
 - To avoid sorting problems, I'm sorting the days of the week by their index, so the output is always sorted by the day of the week, as well as the opening hours are always being sorted from the earliest to the latest. This way the JSON input can have the days of the week in any order and the output will always be the same.
-- The validation is assuming that no input is also a valid input, in this case, the output will be empty
+- The validation is assuming that no input is also a valid input, in this case, the output will assume all days are closed days
 - The validation is assuming that non-existing days of the week or unknown keys will be stripped and ignored.
 
 # About the input format
@@ -506,4 +525,4 @@ As you can see, the code is super complex both to parse and to understand, but i
 
 We can repeat the steps from 3 to 7 until we reach the end of the buffer, this way we would be able to parse the whole week.
 
-> I didn't fully implemented this or gave it much though as it would be too difficult not only to parse it back but to also generate the input, but it's a very interesting way to represent the opening hours of a restaurant.
+> I didn't fully implemented this or gave it much though as it would be too difficult not only to parse it back but to also generate the input, but it's a very interesting way to represent the opening hours of a restaurant. I'm thinking on implementing and writing about this (bitmaps) in the future.
