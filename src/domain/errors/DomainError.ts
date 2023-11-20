@@ -5,7 +5,7 @@ interface HTTPErrorOptions extends ErrorOptions {
 	name: string
 }
 
-export class HTTPError extends Error {
+export class DomainError extends Error {
 	status: number = 500
 	code: string = 'UNKNOWN_ERROR'
 	constructor(options: HTTPErrorOptions) {
