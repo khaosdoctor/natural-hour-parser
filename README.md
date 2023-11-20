@@ -313,10 +313,7 @@ For all other errors, there's [another middleware](./src/presentation/REST/middl
 ### General remarks
 
 - I'm using Node 20.6+ with ES6 modules so we have the latest features of the language.
-- I'm using the Node's native test runner for testing, not because I don't like Jest, but because I always try to reduce the amount of external dependencies in my projects.
-  - I'm using the `--experimental-test-coverage` to collect the coverage data. However, it's the same as if I used `nyc` or `c8` to collect the coverage data.
-  - Tests are executed directly in the TypeScript files through pre-parsing via `tsx` loaders directly in Node, since this application doesn't require the use of environment variables, we can use it directly in the command as `node --experimental-loader=tsx --test ./src/index.ts`. However if we required envs, we could add `NODE_OPTIONS='--import=tsx' node --test --env-file=.env ./src/index.ts`.
-  - Node 20 [seems to have support for glob patterns](https://github.com/nodejs/node/pull/47653#issuecomment-1793514839) but it doesn't seem to be working properly, so they [moved it to v21](https://nodejs.org/en/blog/announcements/v21-release-announce#support-for-globs-in-the-nodejs-test-runner) to avoid using a current version and use LTS I'm also using `glob` to find the files to test.
+- I could use Node's native test runner but it's still experimental and it doesn't have a good support for general mocks, so I'm using [Jest](https://jestjs.io) instead.
 - I'm using [debug](https://www.npmjs.com/package/debug) for logging, it's a very simple and lightweight package that allows us to easily filter the logs by prefix.
 - There are some comments in the code, I usually don't like to add comments unless it's to make it easier to understand, but I added some to explain some decisions I made.
 
@@ -449,6 +446,8 @@ The bad side of this is that we are not conveying a lot of meaning in the input,
 > It's also possible to use objects instead of tuples, so instead of `[79200, 10800]` we could have `{ open: 79200, duration: 10800 }`, the parsing would be essentially the same
 
 ## Bitmaps
+
+> This is a wild idea, but I think it's interesting to think about it.
 
 We could also use bitmaps to represent the opening hours, this way we could represent the opening hours in a single number. This would be a very efficient way to represent the opening hours, but it would be very hard to read and understand, the code to parse it wouldn't be super simple as well.
 

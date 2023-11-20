@@ -22,6 +22,9 @@ module.exports = {
 				// that's handled by the runner itself
 				'@typescript-eslint/no-floating-promises': 'off',
 			},
+			env: {
+				jest: true,
+			},
 		},
 	],
 	parserOptions: {
@@ -32,5 +35,6 @@ module.exports = {
 		'@typescript-eslint/explicit-function-return-type': 'off',
 		'@typescript-eslint/no-misused-promises': 'off',
 		'@typescript-eslint/strict-boolean-expressions': 'off',
+		'@typescript-eslint/return-await': 'off',
 	},
 }
