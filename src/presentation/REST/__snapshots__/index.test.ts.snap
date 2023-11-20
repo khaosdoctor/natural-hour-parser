@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should handle any other errors as boundaries 1`] = `
+{
+  "message": "Internal server error",
+}
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should handle domain errors 1`] = `
+{
+  "code": "INVALID_INPUT",
+  "message": "Number of opening and closing hours must match",
+  "name": "InvalidInputError",
+}
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should handle input errors 1`] = `
+{
+  "issues": [
+    {
+      "code": "invalid_enum_value",
+      "message": "Invalid enum value. Expected 'open' | 'close', received 'not a valid type'",
+      "options": [
+        "open",
+        "close",
+      ],
+      "path": [
+        "monday",
+        0,
+        "type",
+      ],
+      "received": "not a valid type",
+    },
+  ],
+  "name": "ZodError",
+}
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should return parsed opening hours in JSON format 1`] = `
+{
+  "friday": [
+    {
+      "close": "1970-01-01T01:00:00.000Z",
+      "open": "1970-01-01T10:00:00.000Z",
+    },
+  ],
+  "monday": [],
+  "saturday": [
+    {
+      "close": "1970-01-01T01:00:00.000Z",
+      "open": "1970-01-01T10:00:00.000Z",
+    },
+  ],
+  "sunday": [
+    {
+      "close": "1970-01-01T21:00:00.000Z",
+      "open": "1970-01-01T12:00:00.000Z",
+    },
+  ],
+  "thursday": [
+    {
+      "close": "1970-01-01T18:00:00.000Z",
+      "open": "1970-01-01T10:30:00.000Z",
+    },
+  ],
+  "tuesday": [
+    {
+      "close": "1970-01-01T18:00:00.000Z",
+      "open": "1970-01-01T10:00:00.000Z",
+    },
+  ],
+  "wednesday": [],
+}
+`;
+
+exports[`Integration Tests POST /parsers/restaurants/opening-hours should return parsed opening hours in text format 1`] = `
+"Sunday: 12:00 PM - 9:00 PM
+Monday: Closed
+Tuesday: 10:00 AM - 6:00 PM
+Wednesday: Closed
+Thursday: 10:30 AM - 6:00 PM
+Friday: 10:00 AM - 1:00 AM
+Saturday: 10:00 AM - 1:00 AM"
+`;

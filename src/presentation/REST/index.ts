@@ -35,18 +35,23 @@ function loadRoutes(
 	return app
 }
 
-export async function RESTInterface(config: AppConfig, services: ServiceList) {
+export function RESTInterface(config: AppConfig, services: ServiceList) {
 	const logger = config.logger.extend('RESTInterface')
 	const app = loadRoutes(logger, config, services)
 
 	let server: Server | undefined
 	return {
+		app,
+		// Those are internal functions that are not tested
+		// since they're part of the framework functionality
+		/* istanbul ignore next */
 		async start() {
 			logger('Starting REST Interface')
 			server = app.listen(config.PORT, () => {
 				console.log(`Listening on port ${config.PORT}`)
 			})
 		},
+		/* istanbul ignore next */
 		async stop() {
 			logger('Stopping REST Interface')
 			if (server) {
@@ -59,9 +64,7 @@ export async function RESTInterface(config: AppConfig, services: ServiceList) {
 					logger('REST Interface stopped')
 					process.exit(exitCode)
 				})
-				return
 			}
-			process.exit(0)
 		},
 	}
 }

@@ -14,7 +14,7 @@ export class ParserService {
 
 	async parseOpeningHours(input: OpeningHoursInput) {
 		this.#logger('Parsing opening hours')
-		return await this.#parser.parseOpeningHours(input)
+		return this.#parser.parseOpeningHours(input)
 	}
 
 	formatIntervals(

@@ -2,12 +2,17 @@ import { type AppConfig, appConfig } from './config.js'
 import { RESTInterface } from './presentation/REST/index.js'
 import { setTimeout } from 'timers/promises'
 import { ParserService } from './services/parserService.js'
+import type { Express } from 'express'
 
 export type ServiceList = Awaited<ReturnType<typeof initializeDependencies>>
 export type ApplicationInterface = (
 	config: AppConfig,
 	services: ServiceList
-) => Promise<{ start: () => Promise<void>; stop: () => Promise<void> }>
+) => {
+	start: () => Promise<void>
+	stop: () => Promise<void>
+	app: Express
+}
 
 /**
  * It's also possible to use a dependency injection framework like InversifyJS
@@ -29,7 +34,7 @@ async function main(application: ApplicationInterface, config: AppConfig) {
 	logger('Starting application with config %O', config)
 
 	const services = await initializeDependencies(config)
-	const { start, stop } = await application(config, services)
+	const { start, stop } = application(config, services)
 
 	const gracefulTimeout = async () => {
 		await Promise.race([
